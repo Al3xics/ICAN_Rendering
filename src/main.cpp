@@ -1,4 +1,5 @@
 #include "opengl-framework/opengl-framework.hpp" // Inclue la librairie qui va nous servir à faire du rendu
+#include "glm/ext/matrix_clip_space.hpp"
 
 int main()
 {
@@ -38,6 +39,14 @@ int main()
         .fragment = gl::ShaderSource::File{"res/fragment.glsl"},
     }};
 
+    auto camera = gl::Camera{};
+    gl::set_events_callbacks({camera.events_callbacks()});
+
+
+
+
+
+
     while (gl::window_is_open())
     {
         // Rendu à chaque frame
@@ -46,9 +55,15 @@ int main()
 
         // gl::bind_default_shader(); // On a besoin qu'un shader soit bind (i.e. "actif") avant de draw(). On en reparle dans la section d'après.
         shader.bind();
-        shader.set_uniform("aspect_ratio", gl::framebuffer_aspect_ratio());
+        // shader.set_uniform("aspect_ratio", gl::framebuffer_aspect_ratio());
+
+        glm::mat4 const view_matrix = camera.view_matrix();
+        glm::mat4 const projection_matrix = glm::infinitePerspective(glm::radians(90.f) /*field of view in radians*/, gl::framebuffer_aspect_ratio() /*aspect ratio*/, 0.001f /*near plane*/);
+        glm::mat4 const view_projection_matrix = projection_matrix * view_matrix;
+
         shader.set_uniform("rotation_speed", 1.f);
         shader.set_uniform("time", gl::time_in_seconds());
+        shader.set_uniform("view_projection_matrix", view_projection_matrix);
         // triangle_mesh.draw();
         rectangle_mesh.draw();
     }
