@@ -24,11 +24,13 @@ int main()
                 -0.5f, -0.5f,
                 0.5f, -0.5f,
                 -0.5f, 0.5f,
-                0.5f, -0.5f,
-                -0.5f, 0.5f,
                 0.5f, 0.5f
             },
         }},
+        .index_buffer = {
+            0, 1, 2,
+            1, 2, 3
+        },
     }};
 
     while (gl::window_is_open())
