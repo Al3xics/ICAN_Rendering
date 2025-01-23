@@ -46,6 +46,7 @@ int main()
 
         // gl::bind_default_shader(); // On a besoin qu'un shader soit bind (i.e. "actif") avant de draw(). On en reparle dans la section d'après.
         shader.bind();
+        shader.set_uniform("aspect_ratio", gl::framebuffer_aspect_ratio());
         // triangle_mesh.draw();
         rectangle_mesh.draw();
     }
