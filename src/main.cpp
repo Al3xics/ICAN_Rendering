@@ -33,13 +33,19 @@ int main()
         },
     }};
 
+    auto const shader = gl::Shader{{
+        .vertex   = gl::ShaderSource::File{"res/vertex.glsl"},
+        .fragment = gl::ShaderSource::File{"res/fragment.glsl"},
+    }};
+
     while (gl::window_is_open())
     {
         // Rendu à chaque frame
         glClearColor(0.f, 0.f, 1.f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        gl::bind_default_shader(); // On a besoin qu'un shader soit bind (i.e. "actif") avant de draw(). On en reparle dans la section d'après.
+        // gl::bind_default_shader(); // On a besoin qu'un shader soit bind (i.e. "actif") avant de draw(). On en reparle dans la section d'après.
+        shader.bind();
         // triangle_mesh.draw();
         rectangle_mesh.draw();
     }
