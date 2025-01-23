@@ -6,6 +6,7 @@ layout(location = 0) in vec3 in_position;
 uniform float time;
 uniform float rotation_speed;
 uniform mat4 view_projection_matrix;
+out vec3 vertex_position;
 
 void main()
 {
@@ -16,6 +17,7 @@ void main()
     // position.y += cos(time * rotation_speed);
     // position.x /= aspect_ratio;
 
+    vertex_position = in_position;
 
     // gl_Position = view_projection_matrix * vec4(in_position, 0., 1.);
     gl_Position = view_projection_matrix * vec4(in_position, 1.);
