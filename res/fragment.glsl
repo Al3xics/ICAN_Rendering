@@ -5,9 +5,11 @@ in vec3 vertex_position;
 in vec2 uv;
 in vec3 normal;
 uniform sampler2D my_texture;
+uniform vec3 light_direction;
 
 void main()
 {
     vec4 texture_color = texture(my_texture, uv);
-    out_color = vec4(normal, 1);
+    float produit_scalaire = dot(normalize(normal), light_direction);
+    out_color = vec4(produit_scalaire * texture_color);
 }

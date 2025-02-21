@@ -206,7 +206,7 @@ int main()
             shader.bind();
 
             glm::mat4 const view_matrix = camera.view_matrix();
-            glm::mat4 const projection_matrix = glm::infinitePerspective(glm::radians(90.f), gl::framebuffer_aspect_ratio(), 0.001f);
+            glm::mat4 const projection_matrix = glm::infinitePerspective(glm::radians(90.f), gl::framebuffer_aspect_ratio(), 0.001f /*near plane*/);
             glm::mat4 const translation = glm::translate(glm::mat4{1.f}, glm::vec3{0.f, 0.f, 0.f});
 
             glm::mat4 const view_projection_matrix = projection_matrix * view_matrix * translation;
@@ -215,6 +215,7 @@ int main()
             shader.set_uniform("time", gl::time_in_seconds());
             shader.set_uniform("view_projection_matrix", view_projection_matrix);
             shader.set_uniform("my_texture", fourareen_texture);
+            shader.set_uniform("light_direction", glm::vec3(glm::normalize(glm::vec3(0.2, 0.3, -1))));
             mesh_model.draw();
         });
 
