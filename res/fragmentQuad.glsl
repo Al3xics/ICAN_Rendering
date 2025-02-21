@@ -7,5 +7,5 @@ out vec4 out_color;
 void main()
 {
     vec4 texture_color = texture(my_texture, uv);
-    out_color = vec4(texture_color);
+    out_color = vec4(texture_color.r, 0, 0, 0);
 }
