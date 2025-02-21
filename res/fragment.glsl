@@ -11,5 +11,6 @@ void main()
 {
     vec4 texture_color = texture(my_texture, uv);
     float produit_scalaire = dot(normalize(normal), light_direction);
+    produit_scalaire += 0.3;
     out_color = vec4(produit_scalaire * texture_color);
 }
