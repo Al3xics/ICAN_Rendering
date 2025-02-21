@@ -23,10 +23,10 @@ int main()
         .vertex_buffers = {{
             .layout = {gl::VertexAttribute::Position2D{0 /*Index de l'attribut dans le shader, on en reparle juste après*/}, gl::VertexAttribute::UV(1)},
             .data   = {
-                -1, -1, -1, -1,
-                1, -1, 2, -1,
-                -1, 1, -1, 2,
-                1, 1, 2, 2,
+                -1, -1, 0.8, 0.8,
+                1, -1, 0.9, 0.8,
+                -1, 1, 0.8, 0.9,
+                1, 1, 0.9, 0.9,
             },
         }},
         .index_buffer = {
