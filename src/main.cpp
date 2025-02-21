@@ -8,25 +8,14 @@ int main()
     gl::init("TPs de Rendering"); // On crée une fenêtre et on choisit son nom
     gl::maximize_window(); // On peut la maximiser si on veut
 
-    auto const triangle_mesh = gl::Mesh{{
-        .vertex_buffers = {{
-            .layout = {gl::VertexAttribute::Position2D{0 /*Index de l'attribut dans le shader, on en reparle juste après*/}},
-            .data   = {
-                -1.f, -1.f, // Position2D du 1er sommet
-                +1.f, -1.f, // Position2D du 2ème sommet
-                0.f, +1.f  // Position2D du 3ème sommet
-            },
-        }},
-    }};
-
-    auto const rectangle_mesh = gl::Mesh{{
+    auto const quad_mesh = gl::Mesh{{
         .vertex_buffers = {{
             .layout = {gl::VertexAttribute::Position2D{0 /*Index de l'attribut dans le shader, on en reparle juste après*/}, gl::VertexAttribute::UV(1)},
             .data   = {
-                -1, -1, 0.8, 0.8,
-                1, -1, 0.9, 0.8,
-                -1, 1, 0.8, 0.9,
-                1, 1, 0.9, 0.9,
+                -1, -1, 0, 0,
+                1, -1, 1, 0,
+                -1, 1, 0, 1,
+                1, 1, 1, 1
             },
         }},
         .index_buffer = {
@@ -38,6 +27,11 @@ int main()
     auto const shader = gl::Shader{{
         .vertex   = gl::ShaderSource::File{"res/vertex.glsl"},
         .fragment = gl::ShaderSource::File{"res/fragment.glsl"},
+    }};
+
+    auto const shaderQuad = gl::Shader{{
+        .vertex   = gl::ShaderSource::File{"res/vertexQuad.glsl"},
+        .fragment = gl::ShaderSource::File{"res/fragmentQuad.glsl"},
     }};
 
     auto camera = gl::Camera{};
@@ -99,37 +93,70 @@ int main()
         }
     };
 
+    auto render_target = gl::RenderTarget{gl::RenderTarget_Descriptor{
+        .width          = gl::framebuffer_width_in_pixels(),
+        .height         = gl::framebuffer_height_in_pixels(),
+        .color_textures = {
+            gl::ColorAttachment_Descriptor{
+                .format  = gl::InternalFormat_Color::RGBA8,
+                .options = {
+                    .minification_filter  = gl::Filter::NearestNeighbour, // On va toujours afficher la texture à la taille de l'écran,
+                    .magnification_filter = gl::Filter::NearestNeighbour, // donc les filtres n'auront pas d'effet. Tant qu'à faire on choisit le moins coûteux.
+                    .wrap_x               = gl::Wrap::ClampToEdge,
+                    .wrap_y               = gl::Wrap::ClampToEdge,
+                },
+            },
+        },
+        .depth_stencil_texture = gl::DepthStencilAttachment_Descriptor{
+            .format  = gl::InternalFormat_DepthStencil::Depth32F,
+            .options = {
+                .minification_filter  = gl::Filter::NearestNeighbour,
+                .magnification_filter = gl::Filter::NearestNeighbour,
+                .wrap_x               = gl::Wrap::ClampToEdge,
+                .wrap_y               = gl::Wrap::ClampToEdge,
+            },
+        },
+    }};
+
+    gl::set_events_callbacks({
+        camera.events_callbacks(),
+        {.on_framebuffer_resized = [&](gl::FramebufferResizedEvent const& e) {
+            if(e.width_in_pixels != 0 && e.height_in_pixels != 0) // OpenGL crash si on tente de faire une render target avec une taille de 0
+                render_target.resize(e.width_in_pixels, e.height_in_pixels);
+        }},
+    });
+
 
 
 
     while (gl::window_is_open())
     {
-        // Rendu à chaque frame
-        glClearColor(0.f, 0.f, 1.f, 1.f);
-        // glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // gl::bind_default_shader(); // On a besoin qu'un shader soit bind (i.e. "actif") avant de draw(). On en reparle dans la section d'après.
-        shader.bind();
-        // shader.set_uniform("aspect_ratio", gl::framebuffer_aspect_ratio());
+        render_target.render([&]() {
+            glClearColor(1.f, 0.f, 0.f, 1.f); // Dessine du rouge, non pas à l'écran, mais sur notre render target
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            shader.bind();
 
-        glm::mat4 const view_matrix = camera.view_matrix();
-        glm::mat4 const projection_matrix = glm::infinitePerspective(glm::radians(90.f) /*field of view in radians*/, gl::framebuffer_aspect_ratio() /*aspect ratio*/, 0.001f /*near plane*/);
-        glm::mat4 const rotation = glm::rotate(glm::mat4{1.f}, gl::time_in_seconds() /*angle de la rotation*/, glm::vec3{0.f, 0.f, 1.f} /* axe autour duquel on tourne */);
-        glm::mat4 const rotation2 = glm::rotate(glm::mat4{1.f}, gl::time_in_seconds() /*angle de la rotation*/, glm::vec3{0.f, 1.f, 0.f} /* axe autour duquel on tourne */);
-        glm::mat4 const translation = glm::translate(glm::mat4{1.f}, glm::vec3{0.f, 0.f, 0.f} /* déplacement */);
-        // translation * rotation --> rotate le plane sur son centre
-        // rotation * translation --> rotate le plane autour d'un axe (z ici)
-        glm::mat4 const model_matrix = translation * rotation * rotation2;
+            glm::mat4 const view_matrix = camera.view_matrix();
+            glm::mat4 const projection_matrix = glm::infinitePerspective(glm::radians(90.f) /*field of view in radians*/, gl::framebuffer_aspect_ratio() /*aspect ratio*/, 0.001f /*near plane*/);
+            glm::mat4 const rotation = glm::rotate(glm::mat4{1.f}, gl::time_in_seconds() /*angle de la rotation*/, glm::vec3{0.f, 0.f, 1.f} /* axe autour duquel on tourne */);
+            glm::mat4 const rotation2 = glm::rotate(glm::mat4{1.f}, gl::time_in_seconds() /*angle de la rotation*/, glm::vec3{0.f, 1.f, 0.f} /* axe autour duquel on tourne */);
+            glm::mat4 const translation = glm::translate(glm::mat4{1.f}, glm::vec3{0.f, 0.f, 0.f} /* déplacement */);
 
-        glm::mat4 const view_projection_matrix = projection_matrix * view_matrix * model_matrix;
+            glm::mat4 const model_matrix = translation * rotation * rotation2;
 
-        shader.set_uniform("rotation_speed", 1.f);
-        shader.set_uniform("time", gl::time_in_seconds());
-        shader.set_uniform("view_projection_matrix", view_projection_matrix);
-        // shader.set_uniform("my_texture", texture);
-        // triangle_mesh.draw();
-        // rectangle_mesh.draw();
-        cube_mesh.draw();
+            glm::mat4 const view_projection_matrix = projection_matrix * view_matrix * model_matrix;
+
+            shader.set_uniform("rotation_speed", 1.f);
+            shader.set_uniform("time", gl::time_in_seconds());
+            shader.set_uniform("view_projection_matrix", view_projection_matrix);
+            shader.set_uniform("my_texture", texture);
+            cube_mesh.draw();
+        });
+
+        shaderQuad.bind();
+        shaderQuad.set_uniform("my_texture", render_target.color_texture(0));
+        quad_mesh.draw();
     }
 }
