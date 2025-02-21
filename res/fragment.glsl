@@ -3,11 +3,11 @@
 out vec4 out_color;
 in vec3 vertex_position;
 in vec2 uv;
+in vec3 normal;
 uniform sampler2D my_texture;
 
 void main()
 {
-    // out_color = vec4(vertex_position, 1);
     vec4 texture_color = texture(my_texture, uv);
-    out_color = vec4(texture_color);
+    out_color = vec4(normal, 1);
 }

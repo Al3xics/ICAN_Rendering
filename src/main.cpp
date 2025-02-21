@@ -201,13 +201,13 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         render_target.render([&]() {
-            glClearColor(1.f, 0.f, 0.f, 1.f); // Dessine du rouge, non pas à l'écran, mais sur notre render target
+            glClearColor(1.f, 0.f, 0.f, 1.f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             shader.bind();
 
             glm::mat4 const view_matrix = camera.view_matrix();
-            glm::mat4 const projection_matrix = glm::infinitePerspective(glm::radians(90.f) /*field of view in radians*/, gl::framebuffer_aspect_ratio() /*aspect ratio*/, 0.001f /*near plane*/);
-            glm::mat4 const translation = glm::translate(glm::mat4{1.f}, glm::vec3{0.f, 0.f, 0.f} /* déplacement */);
+            glm::mat4 const projection_matrix = glm::infinitePerspective(glm::radians(90.f), gl::framebuffer_aspect_ratio(), 0.001f);
+            glm::mat4 const translation = glm::translate(glm::mat4{1.f}, glm::vec3{0.f, 0.f, 0.f});
 
             glm::mat4 const view_projection_matrix = projection_matrix * view_matrix * translation;
 
