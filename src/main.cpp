@@ -33,8 +33,8 @@ auto load_mesh(std::filesystem::path const& path) -> gl::Mesh
 
             // Normale
             vertices.push_back(reader.GetAttrib().normals[3 * idx.normal_index + 0]);
-            vertices.push_back(reader.GetAttrib().normals[3 * idx.normal_index + 1]);
             vertices.push_back(reader.GetAttrib().normals[3 * idx.normal_index + 2]);
+            vertices.push_back(reader.GetAttrib().normals[3 * idx.normal_index + 1]);
         };
     }
 
@@ -208,15 +208,18 @@ int main()
             glm::mat4 const view_matrix = camera.view_matrix();
             glm::mat4 const projection_matrix = glm::infinitePerspective(glm::radians(90.f), gl::framebuffer_aspect_ratio(), 0.001f /*near plane*/);
             glm::mat4 const translation = glm::translate(glm::mat4{1.f}, glm::vec3{0.f, 0.f, 0.f});
+            glm::mat4 const rotation = glm::rotate(glm::mat4(1.f), gl::time_in_seconds(),  glm::vec3{1.f, 0.f, 0.f});
 
-            glm::mat4 const view_projection_matrix = projection_matrix * view_matrix * translation;
+            glm::mat4 const model_matrix = translation * rotation;
+            glm::mat4 const view_projection_matrix = projection_matrix * view_matrix * model_matrix;
 
             shader.set_uniform("rotation_speed", 1.f);
             shader.set_uniform("time", gl::time_in_seconds());
             shader.set_uniform("view_projection_matrix", view_projection_matrix);
+            shader.set_uniform("model_matrix", glm::inverse(glm::transpose(model_matrix)));
             shader.set_uniform("my_texture", fourareen_texture);
-            shader.set_uniform("light_direction", glm::vec3(glm::normalize(glm::vec3(0.2, 0.3, -1))));
-            shader.set_uniform("point_light", glm::vec3(0, 0, 0));
+            shader.set_uniform("light_direction", glm::vec3(glm::normalize(glm::vec3(0., 0., -1))));
+            shader.set_uniform("point_light", glm::vec3(2, 2, 2));
             mesh_model.draw();
         });
 
