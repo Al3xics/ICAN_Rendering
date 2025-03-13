@@ -220,6 +220,7 @@ int main()
             shader.set_uniform("my_texture", fourareen_texture);
             shader.set_uniform("light_direction", glm::vec3(glm::normalize(glm::vec3(0., 0., -1))));
             shader.set_uniform("point_light", glm::vec3(2, 2, 2));
+            shader.set_uniform("point_light_color", glm::vec3(0, 10, 0));
             mesh_model.draw();
         });
 
